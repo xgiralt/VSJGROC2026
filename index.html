@@ -1,0 +1,435 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Marcador Vòlei Sant Just</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column, scoreboard first (two team panels side by side), then set chips, then the rally chart. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --line: #d9dee7;
+  --fg: #16202e;
+  --muted: #5e6a7c;
+  --home: #1c5bbf;      /* Sant Just */
+  --home-soft: #e3ecfb;
+  --away: #cf4a22;      /* rival */
+  --away-soft: #fbe7df;
+  --ok: #1d7a4a;
+  --warn: #a4331a;
+  --on-accent: #ffffff;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #171e29; --line: #2a3443; --fg: #e8edf4; --muted: #95a1b3;
+    --home: #5b93f0; --home-soft: #1a2a45; --away: #f07a52; --away-soft: #3a211a;
+    --ok: #4cc488; --warn: #f08a6c; --on-accent: #0b1018; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #171e29; --line: #2a3443; --fg: #e8edf4; --muted: #95a1b3;
+  --home: #5b93f0; --home-soft: #1a2a45; --away: #f07a52; --away-soft: #3a211a;
+  --ok: #4cc488; --warn: #f08a6c; --on-accent: #0b1018; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.brand { font-family: var(--display); font-weight: 700; font-size: 1.35rem; letter-spacing: .02em; text-transform: uppercase; }
+.brand small { display: block; font-family: var(--body); font-weight: 500; font-size: .78rem; letter-spacing: .06em; color: var(--muted); }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.live.on i { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); }
+.live.on { color: var(--ok); }
+
+.picker { display: flex; flex-direction: column; gap: 4px; }
+.picker label { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+select { font: 600 1rem var(--body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; width: 100%; }
+
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.meta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); }
+.meta b { font-family: var(--display); font-size: 1.05rem; color: var(--fg); letter-spacing: .03em; text-transform: uppercase; }
+.teams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.team { display: flex; flex-direction: column; align-items: stretch; gap: 10px; min-width: 0; }
+.tname { font-family: var(--display); font-weight: 700; font-size: 1.25rem; text-transform: uppercase; letter-spacing: .03em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home .tname { color: var(--home); } .away .tname { color: var(--away); }
+.scoreline { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.score { font-family: var(--display); font-weight: 800; font-size: clamp(4.2rem, 17vw, 7.5rem); line-height: .9; font-variant-numeric: tabular-nums; }
+.setsw { display: flex; flex-direction: column; align-items: center; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.setsw span { font-family: var(--display); font-weight: 700; font-size: 1.7rem; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.serve { height: 1.1rem; text-align: center; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+button { font-family: var(--display); cursor: pointer; border-radius: 12px; border: 0; touch-action: manipulation; }
+button:focus-visible, select:focus-visible { outline: 3px solid color-mix(in srgb, var(--home) 60%, transparent); outline-offset: 2px; }
+.plus { font-size: 2.6rem; font-weight: 800; padding: 22px 8px; color: var(--on-accent); transition: transform .08s ease; }
+.home .plus { background: var(--home); } .away .plus { background: var(--away); }
+.plus:active { transform: scale(.97); }
+.minus { align-self: center; font-size: 1rem; font-weight: 700; padding: 6px 18px; background: transparent; border: 1px solid var(--line); color: var(--muted); border-radius: 999px; }
+.minus:active { background: var(--line); }
+.endset { font-size: 1.1rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 14px; background: transparent; color: var(--fg); border: 2px solid var(--fg); }
+.endset:disabled, .plus:disabled, .minus:disabled { opacity: .4; cursor: not-allowed; }
+.msg { min-height: 1.2rem; text-align: center; font-size: .85rem; color: var(--warn); }
+.final { text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.3rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ok); }
+
+.sets { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); min-width: 64px; }
+.chip small { font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.chip b { font-family: var(--display); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.chip.cur { border-color: var(--fg); }
+.w-home { color: var(--home); } .w-away { color: var(--away); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.panel h2 { margin: 0; font-family: var(--display); font-size: 1.15rem; text-transform: uppercase; letter-spacing: .04em; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 18px; height: 3px; border-radius: 2px; }
+#chart { width: 100%; overflow-x: auto; }
+#chart svg { display: block; }
+.empty { color: var(--muted); font-size: .9rem; padding: 18px 0; text-align: center; }
+
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; font-size: .8rem; color: var(--muted); }
+.link { background: transparent; color: var(--muted); font-family: var(--body); font-size: .8rem; text-decoration: underline; padding: 4px; }
+.confirm { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.confirm button { font-size: .9rem; padding: 8px 14px; }
+.danger { background: var(--warn); color: var(--on-accent); }
+.ghost { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+
+@media (max-width: 420px) {
+  .plus { font-size: 2.2rem; padding: 18px 4px; }
+  .tname { font-size: 1.05rem; }
+}
+@media (prefers-reduced-motion: reduce) { .plus { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">Vòlei Sant Just<small>Marcador en directe</small></div>
+    <div class="live" id="live"><i></i><span id="liveTxt">Connectant…</span></div>
+  </header>
+
+  <div class="picker">
+    <label for="match">Partit</label>
+    <select id="match"></select>
+  </div>
+
+  <section class="board" aria-live="polite">
+    <div class="meta"><b id="setLabel">Set 1</b><span id="dateLabel"></span></div>
+    <div class="teams">
+      <div class="team home" id="teamA">
+        <div class="tname" id="nameA">—</div>
+        <div class="scoreline"><div class="score" id="scoreA">0</div><div class="setsw">Sets<span id="setsA">0</span></div></div>
+        <div class="serve" id="serveA"></div>
+        <button class="plus ctl" id="plusA" aria-label="Punt per a l'equip local">+1</button>
+        <button class="minus ctl" id="minusA" aria-label="Treure un punt a l'equip local">−1</button>
+      </div>
+      <div class="team away" id="teamB">
+        <div class="tname" id="nameB">—</div>
+        <div class="scoreline"><div class="score" id="scoreB">0</div><div class="setsw">Sets<span id="setsB">0</span></div></div>
+        <div class="serve" id="serveB"></div>
+        <button class="plus ctl" id="plusB" aria-label="Punt per a l'equip visitant">+1</button>
+        <button class="minus ctl" id="minusB" aria-label="Treure un punt a l'equip visitant">−1</button>
+      </div>
+    </div>
+    <div class="final" id="final" hidden></div>
+    <button class="endset ctl" id="endSet">Final de set</button>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <div class="sets" id="sets"></div>
+
+  <section class="panel">
+    <h2>Evolució del partit</h2>
+    <div class="legend"><span><i id="lgA" style="background:var(--home)"></i><b id="lgNameA">—</b></span><span><i style="background:var(--away)"></i><b id="lgNameB">—</b></span></div>
+    <div id="chart"></div>
+  </section>
+
+  <div class="foot">
+    <span id="updated">Sense punts encara</span>
+    <div id="resetBox" class="ctl-wrap">
+      <button class="link" id="resetBtn">Reiniciar partit</button>
+      <div class="confirm" id="confirm" hidden>
+        <span>Esborrar tots els punts d'aquest partit?</span>
+        <button class="danger" id="resetYes">Esborrar</button>
+        <button class="ghost" id="resetNo">Cancel·lar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const MATCHES = [
+    { id: "j2",  j: 2,  date: "2026-10-18", a: "Esplugues",  b: "Sant Just" },
+    { id: "j3",  j: 3,  date: "2026-10-25", a: "Barça",      b: "Sant Just" },
+    { id: "j4",  j: 4,  date: "2026-11-08", a: "Sant Just",  b: "Sant Cugat" },
+    { id: "j5",  j: 5,  date: "2026-11-15", a: "Espanyol",   b: "Sant Just" },
+    { id: "j7",  j: 7,  date: "2026-12-13", a: "Sant Just",  b: "Esplugues" },
+    { id: "j8",  j: 8,  date: "2026-12-20", a: "Sant Just",  b: "Barça" },
+    { id: "j9",  j: 9,  date: "2027-01-17", a: "Sant Cugat", b: "Sant Just" },
+    { id: "j10", j: 10, date: "2027-01-24", a: "Sant Just",  b: "Espanyol" },
+  ];
+  const SETS_TO_WIN = 3;
+  const $ = (id) => document.getElementById(id);
+  const fmtDate = (iso) => { const [y, m, d] = iso.split("-"); return `${d}-${m}-${y}`; };
+
+  // ---------- pure match logic ----------
+  // state: { sets: ["ABBA…", …], finished: bool }  — last set is the one in play unless finished
+  const emptyState = () => ({ sets: [""], finished: false });
+  const count = (s) => { let a = 0, b = 0; for (const c of s) c === "A" ? a++ : b++; return { a, b }; };
+  const target = (idx) => (idx === 4 ? 15 : 25); // 5th set to 15
+  function setWinner(s, idx) {
+    const { a, b } = count(s), t = target(idx);
+    if (a >= t && a - b >= 2) return "A";
+    if (b >= t && b - a >= 2) return "B";
+    return null;
+  }
+  function setsWon(st) {
+    const closed = st.finished ? st.sets.length : st.sets.length - 1;
+    let a = 0, b = 0;
+    for (let i = 0; i < closed; i++) { const { a: x, b: y } = count(st.sets[i]); x > y ? a++ : b++; }
+    return { a, b };
+  }
+  // Close the set in play: finish the match if someone reached 3 sets, otherwise open the next set
+  function afterClose(st) {
+    const w = setsWon({ sets: st.sets, finished: true });
+    if (w.a >= SETS_TO_WIN || w.b >= SETS_TO_WIN) st.finished = true; else st.sets.push("");
+  }
+  function addPoint(st, team) {
+    if (st.finished) return st;
+    const cur = st.sets.length - 1;
+    st.sets[cur] += team;
+    if (setWinner(st.sets[cur], cur)) afterClose(st);
+    return st;
+  }
+  function removePoint(st, team) {
+    // Reopen the previous set if the current one hasn't started (or the match was closed)
+    if (st.finished) st.finished = false;
+    else if (st.sets.length > 1 && st.sets[st.sets.length - 1] === "") st.sets.pop();
+    const cur = st.sets.length - 1, s = st.sets[cur], i = s.lastIndexOf(team);
+    if (i >= 0) st.sets[cur] = s.slice(0, i) + s.slice(i + 1);
+    return st;
+  }
+  function manualEnd(st) {
+    if (st.finished) return "El partit ja ha acabat.";
+    const cur = st.sets.length - 1, { a, b } = count(st.sets[cur]);
+    if (a === b) return "No es pot tancar un set empatat.";
+    afterClose(st);
+    return null;
+  }
+
+  // ---------- app state ----------
+  let current = null;          // match object
+  let state = emptyState();
+  let updatedAt = null;
+  let db = null, unsub = null;
+  let canScore = true;
+  let writing = false, dirty = false;
+  const local = {};            // fallback when there is no shared store
+
+  function pickDefault() {
+    const h = (location.hash || "").slice(1);
+    const byHash = MATCHES.find((m) => m.id === h);
+    if (byHash) return byHash;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    return MATCHES.find((m) => new Date(m.date + "T23:59:59") >= today) || MATCHES[MATCHES.length - 1];
+  }
+
+  const sel = $("match");
+  for (const m of MATCHES) {
+    const o = document.createElement("option");
+    o.value = m.id;
+    o.textContent = `Jornada ${m.j} (${fmtDate(m.date)}) · ${m.a.toUpperCase()} – ${m.b.toUpperCase()}`;
+    sel.appendChild(o);
+  }
+  sel.addEventListener("change", () => selectMatch(MATCHES.find((m) => m.id === sel.value)));
+
+  function selectMatch(m) {
+    current = m; sel.value = m.id;
+    try { history.replaceState(null, "", "#" + m.id); } catch (e) {}
+    state = local[m.id] ? JSON.parse(JSON.stringify(local[m.id])) : emptyState();
+    updatedAt = null; writing = false; dirty = false;
+    hideConfirm(); $("msg").textContent = "";
+    render();
+    subscribe();
+  }
+
+  function subscribe() {
+    if (unsub) { unsub(); unsub = null; }
+    if (!db) return;
+    const id = current.id;
+    unsub = db.doc("matches/" + id).onSnapshot((snap) => {
+      if (!current || current.id !== id) return;
+      if (writing || dirty) return; // our own newer local state wins until it's saved
+      const d = snap.exists ? snap.data() : null;
+      state = d && Array.isArray(d.sets) && d.sets.length ? { sets: d.sets.map(String), finished: !!d.finished } : emptyState();
+      updatedAt = d && d.updatedAt || null;
+      render();
+    }, () => setLive(false, "Connexió perduda"));
+  }
+
+  async function save() {
+    local[current.id] = JSON.parse(JSON.stringify(state));
+    if (!db) return;
+    if (writing) { dirty = true; return; }
+    writing = true;
+    const id = current.id;
+    try {
+      do {
+        dirty = false;
+        updatedAt = new Date().toISOString();
+        await db.doc("matches/" + id).set({ sets: state.sets.slice(), finished: state.finished, updatedAt });
+      } while (dirty && current.id === id);
+    } catch (e) {
+      if (e && e.code === "invalid_argument") { canScore = false; flash("No tens permís per anotar en aquest partit."); }
+      else flash("No s'ha pogut desar. Torna-ho a provar.");
+    } finally { writing = false; }
+  }
+
+  function act(fn) {
+    if (!canScore) return;
+    fn(state);
+    requestWake();
+    render(); save();
+  }
+
+  $("plusA").onclick = () => act((s) => addPoint(s, "A"));
+  $("plusB").onclick = () => act((s) => addPoint(s, "B"));
+  $("minusA").onclick = () => act((s) => removePoint(s, "A"));
+  $("minusB").onclick = () => act((s) => removePoint(s, "B"));
+  $("endSet").onclick = () => {
+    if (!canScore) return;
+    const err = manualEnd(state);
+    if (err) return flash(err);
+    render(); save();
+  };
+  $("resetBtn").onclick = () => { $("confirm").hidden = false; $("resetBtn").hidden = true; };
+  $("resetNo").onclick = hideConfirm;
+  $("resetYes").onclick = () => { hideConfirm(); act((s) => { s.sets = [""]; s.finished = false; }); };
+  function hideConfirm() { $("confirm").hidden = true; $("resetBtn").hidden = false; }
+
+  let flashT;
+  function flash(t) { $("msg").textContent = t; clearTimeout(flashT); flashT = setTimeout(() => ($("msg").textContent = ""), 3500); }
+
+  let wake = null;
+  async function requestWake() {
+    if (wake || !navigator.wakeLock) return;
+    try { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => (wake = null)); } catch (e) {}
+  }
+
+  function setLive(on, txt) { $("live").classList.toggle("on", on); $("liveTxt").textContent = txt; }
+
+  // ---------- render ----------
+  function render() {
+    const m = current, cur = state.sets.length - 1;
+    const s = state.sets[cur], { a, b } = count(s), w = setsWon(state);
+    $("nameA").textContent = m.a; $("nameB").textContent = m.b;
+    $("lgNameA").textContent = m.a; $("lgNameB").textContent = m.b;
+    $("scoreA").textContent = a; $("scoreB").textContent = b;
+    $("setsA").textContent = w.a; $("setsB").textContent = w.b;
+    $("dateLabel").textContent = `Jornada ${m.j} · ${fmtDate(m.date)}`;
+    const t = target(cur);
+    $("setLabel").textContent = state.finished ? "Partit acabat" : `Set ${cur + 1} · a ${t}`;
+    const last = s.slice(-1);
+    $("serveA").textContent = !state.finished && last === "A" ? "● Serveix" : "";
+    $("serveB").textContent = !state.finished && last === "B" ? "● Serveix" : "";
+
+    const fin = $("final");
+    if (state.finished) { fin.hidden = false; fin.textContent = `Guanya ${w.a > w.b ? m.a : m.b} ${Math.max(w.a, w.b)}–${Math.min(w.a, w.b)}`; }
+    else fin.hidden = true;
+
+    document.querySelectorAll(".ctl").forEach((el) => (el.hidden = !canScore));
+    $("resetBox").hidden = !canScore;
+    $("plusA").disabled = $("plusB").disabled = $("endSet").disabled = state.finished;
+
+    // set chips
+    const box = $("sets"); box.textContent = "";
+    state.sets.forEach((ss, i) => {
+      const c = count(ss), closed = state.finished || i < cur;
+      const chip = document.createElement("div");
+      chip.className = "chip" + (!closed ? " cur" : "");
+      const lab = document.createElement("small"); lab.textContent = closed ? `Set ${i + 1}` : `Set ${i + 1} · en joc`;
+      const val = document.createElement("b");
+      const x = document.createElement("span"), sep = document.createTextNode("–"), y = document.createElement("span");
+      x.textContent = c.a; y.textContent = c.b;
+      if (closed) { (c.a > c.b ? x : y).className = c.a > c.b ? "w-home" : "w-away"; }
+      val.append(x, sep, y); chip.append(lab, val); box.appendChild(chip);
+    });
+
+    $("updated").textContent = updatedAt ? "Actualitzat " + new Date(updatedAt).toLocaleTimeString("ca-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : (s || cur ? "" : "Sense punts encara");
+    drawChart();
+  }
+
+  // ---------- chart ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, text) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; return n; };
+  function drawChart() {
+    const host = $("chart"); host.textContent = "";
+    const sets = state.sets.filter((s, i) => s.length || i === state.sets.length - 1);
+    const total = sets.reduce((n, s) => n + s.length, 0);
+    if (!total) { const d = document.createElement("div"); d.className = "empty"; d.textContent = "El gràfic apareixerà amb el primer punt. Cada set comença a zero."; host.appendChild(d); return; }
+
+    const W = Math.max(host.clientWidth || 600, 300), H = 260;
+    const pad = { l: 30, r: 14, t: 26, b: 26 }, gap = 14;
+    let maxY = 25; for (const s of sets) { const c = count(s); maxY = Math.max(maxY, c.a, c.b); }
+    maxY = Math.ceil(maxY / 5) * 5;
+    const widths = sets.map((s) => Math.max(s.length, 1));
+    const sumW = widths.reduce((x, y) => x + y, 0);
+    const innerW = W - pad.l - pad.r - gap * (sets.length - 1);
+    const unit = innerW / sumW;
+    const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / maxY);
+
+    const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Evolució dels punts per set" });
+    for (let v = 0; v <= maxY; v += 5) {
+      svg.appendChild(el("line", { x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v), stroke: "var(--line)", "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: pad.l - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--muted)", "font-family": "var(--body)" }, v));
+    }
+    let x0 = pad.l;
+    sets.forEach((s, i) => {
+      const w = widths[i] * unit, sx = (k) => x0 + k * unit;
+      const idx = state.sets.indexOf(s) >= 0 ? i : i;
+      if (i > 0) svg.appendChild(el("line", { x1: x0 - gap / 2, x2: x0 - gap / 2, y1: pad.t - 14, y2: H - pad.b, stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+      svg.appendChild(el("text", { x: x0 + w / 2, y: 14, "text-anchor": "middle", "font-size": 11, "font-weight": 600, fill: "var(--muted)", "font-family": "var(--body)", "letter-spacing": ".06em" }, "SET " + (i + 1)));
+      let a = 0, b = 0, pa = `M${sx(0)},${y(0)}`, pb = pa;
+      for (let k = 0; k < s.length; k++) {
+        s[k] === "A" ? a++ : b++;
+        pa += ` H${sx(k + 1)} V${y(a)}`; pb += ` H${sx(k + 1)} V${y(b)}`;
+      }
+      svg.appendChild(el("path", { d: pb, fill: "none", stroke: "var(--away)", "stroke-width": 2.5, "stroke-linejoin": "round" }));
+      svg.appendChild(el("path", { d: pa, fill: "none", stroke: "var(--home)", "stroke-width": 2.5, "stroke-linejoin": "round" }));
+      if (s.length) {
+        const ex = sx(s.length);
+        svg.appendChild(el("circle", { cx: ex, cy: y(a), r: 3.5, fill: "var(--home)" }));
+        svg.appendChild(el("circle", { cx: ex, cy: y(b), r: 3.5, fill: "var(--away)" }));
+        const ta = y(a), tb = y(b), close = Math.abs(ta - tb) < 12;
+        const anchor = ex > W - 40 ? "end" : "start", dx = anchor === "end" ? -6 : 6;
+        svg.appendChild(el("text", { x: ex + dx, y: (close && a >= b ? ta - 6 : ta + 4), "text-anchor": anchor, "font-size": 12, "font-weight": 700, fill: "var(--home)", "font-family": "var(--body)" }, a));
+        svg.appendChild(el("text", { x: ex + dx, y: (close && b > a ? tb - 6 : close ? tb + 12 : tb + 4), "text-anchor": anchor, "font-size": 12, "font-weight": 700, fill: "var(--away)", "font-family": "var(--body)" }, b));
+      }
+      x0 += w + gap;
+    });
+    svg.appendChild(el("text", { x: W - pad.r, y: H - 6, "text-anchor": "end", "font-size": 11, fill: "var(--muted)", "font-family": "var(--body)" }, "punts jugats →"));
+    host.appendChild(svg);
+  }
+  let rT; window.addEventListener("resize", () => { clearTimeout(rT); rT = setTimeout(drawChart, 120); });
+
+  // ---------- boot ----------
+  selectMatch(pickDefault());
+  setLive(false, "Només en aquest dispositiu");
+  (async () => {
+    const c = window.claude;
+    if (!c || !c.use) return;
+    try {
+      const [d, u] = await Promise.all([c.use("db"), c.use("user")]);
+      if (u) { try { canScore = await u.canEdit(); } catch (e) {} }
+      if (d) { db = d; setLive(true, canScore ? "En directe · anotador" : "En directe"); subscribe(); }
+      else { canScore = true; }
+      render();
+    } catch (e) {}
+  })();
+})();
+</script>
+
+</body></html>
